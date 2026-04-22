@@ -1,9 +1,9 @@
 const Router = require('express');
 const router = new Router();
 const bookController = require('../controllers/bookController')
+const checkRole = require('../middleware/checkRoleMiddeleware')
 
-//  створити книгу
-router.post('/', bookController.createBook)
+router.post('/', checkRole('ADMIN'), bookController.createBook)
 
 // отримати всі книги
 router.get('/', bookController.getAllBooks)

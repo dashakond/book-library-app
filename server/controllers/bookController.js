@@ -53,7 +53,7 @@ class BookController {
                 authorId: author.id,
                 genreId: genre.id,
                 shelf,
-                userId,
+                userId: req.user.id,
                 image_url: fileName
             });
 
@@ -67,9 +67,20 @@ class BookController {
 
     async getAllBooks(req, res) {
         try {
-            const books = await Book.findAll({
-                include: [Author, Genre]
-            });
+            const { role, id } = req.user;
+
+            let books;
+
+            if (role === 'ADMIN') {
+                books = await Book.findAll({
+                    include: [Author, Genre]
+                });
+            } else {
+                books = await Book.findAll({
+                    where: { userId: id },
+                    include: [Author, Genre]
+                });
+            }
 
             return res.json(books);
 
@@ -80,13 +91,22 @@ class BookController {
 
     async getOneBook(req, res) {
         try {
-            const { id } = req.params;
+            const { role, id: userId } = req.user;
+            const bookId = req.params.id;
 
-            const book = await Book.findByPk(id, {
+            const where = role === 'ADMIN' ? { id: bookId } : { id: bookId, userId };
+
+            const book = await Book.findOne({
+                where,
                 include: [Author, Genre]
             });
 
+            if (!book) {
+                return res.status(404).json({ message: "Book not found" });
+            }
+
             return res.json(book);
+
         } catch (e) {
             return res.status(500).json({ message: "Error fetching book" });
         }
@@ -94,18 +114,20 @@ class BookController {
 
     async updateBook(req, res) {
         try {
-            const { id } = req.params;
-            const data = req.body;
+            const { role, id: userId } = req.user;
 
-            const book = await Book.findByPk(id);
+            const book = await Book.findOne({
+                where: role === 'ADMIN' ? { id: req.params.id } : { id: req.params.id, userId }
+            });
 
             if (!book) {
-                return res.status(404).json({ message: "Book not found" });
+                return res.status(403).json({ message: "No access or not found" });
             }
 
-            await book.update(data);
+            await book.update(req.body);
 
             return res.json(book);
+
         } catch (e) {
             return res.status(500).json({ message: "Error updating book" });
         }
@@ -113,17 +135,22 @@ class BookController {
 
     async deleteBook(req, res) {
         try {
-            const { id } = req.params;
+            const { role, id: userId } = req.user;
 
-            const book = await Book.findByPk(id);
+            const book = await Book.findOne({
+                where: role === 'ADMIN' ?
+                    { id: req.params.id } :
+                    { id: req.params.id, userId }
+            });
 
             if (!book) {
-                return res.status(404).json({ message: "Book not found" });
+                return res.status(403).json({ message: "No access or not found" });
             }
 
             await book.destroy();
 
             return res.json({ message: "Book deleted" });
+
         } catch (e) {
             return res.status(500).json({ message: "Error deleting book" });
         }
