@@ -8,6 +8,8 @@ const genreRouter = require('./genreRouter')
 const readingSessionRouter = require('./readingSessionRouter')
 const reviewRouter = require('./reviewRouter');
 const collectionRouter = require('./collectionRouter');
+const wishlistController = require('./wishlistRouter');
+const goalController = require('./goalRouter');
 
 
 router.use('/user', userRouter)
@@ -16,6 +18,8 @@ router.use('/author', authorRouter)
 router.use('/genre', genreRouter)
 router.use('/sessions', readingSessionRouter);
 router.use('/reviews', reviewRouter);
+router.use('/wishlist', wishlistController);
 router.use('/collections', collectionRouter);
+router.use('/goals', goalController);
 
 module.exports = router

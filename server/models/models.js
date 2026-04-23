@@ -6,6 +6,8 @@ const ReadingSession = require('./ReadingSession');
 const Review = require('./Review');
 const Collection = require('./Collection')
 const CollectionBook = require('./CollectionBook')
+const Wishlist = require('./Wishlist')
+const Goal = require('./Goal')
 
 // 🔗 AUTHOR → BOOKS (1:N)
 Author.hasMany(Book, {
@@ -77,6 +79,18 @@ Book.belongsToMany(Collection, {
     through: CollectionBook,
     foreignKey: 'bookId'
 });
+User.hasMany(Wishlist, {
+    foreignKey: 'userId'
+});
+Wishlist.belongsTo(User, {
+    foreignKey: 'userId'
+});
+User.hasMany(Goal, {
+    foreignKey: 'userId'
+});
+Goal.belongsTo(User, {
+    foreignKey: 'userId'
+});
 
 module.exports = {
     User,
@@ -86,5 +100,7 @@ module.exports = {
     ReadingSession,
     Review,
     Collection,
-    CollectionBook
+    CollectionBook,
+    Wishlist,
+    Goal
 };
