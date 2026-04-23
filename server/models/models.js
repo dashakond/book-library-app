@@ -3,7 +3,9 @@ const Book = require('./Book');
 const Author = require('./Author');
 const Genre = require('./Genre');
 const ReadingSession = require('./ReadingSession');
-const Review = require('./Review')
+const Review = require('./Review');
+const Collection = require('./Collection')
+const CollectionBook = require('./CollectionBook')
 
 // 🔗 AUTHOR → BOOKS (1:N)
 Author.hasMany(Book, {
@@ -58,11 +60,31 @@ Review.belongsTo(Book, {
     foreignKey: 'bookId'
 });
 
+// 👤 USER → COLLECTIONS
+User.hasMany(Collection, {
+    foreignKey: 'userId'
+});
+Collection.belongsTo(User, {
+    foreignKey: 'userId'
+});
+
+// 📚 COLLECTION ↔ BOOK (M:N)
+Collection.belongsToMany(Book, {
+    through: CollectionBook,
+    foreignKey: 'collectionId'
+});
+Book.belongsToMany(Collection, {
+    through: CollectionBook,
+    foreignKey: 'bookId'
+});
+
 module.exports = {
     User,
     Book,
     Author,
     Genre,
     ReadingSession,
-    Review
+    Review,
+    Collection,
+    CollectionBook
 };
