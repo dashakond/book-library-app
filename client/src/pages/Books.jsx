@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
 import API from "../api/axios";
 import "./Library.css";
+import { useNavigate } from "react-router-dom";
 
 function Books() {
   const [books, setBooks] = useState([]);
-
+  const navigate = useNavigate();
+  
   useEffect(() => {
     const fetchBooks = async () => {
       try {
@@ -24,7 +26,12 @@ function Books() {
 
       <div className="books-grid">
         {books.map((book) => (
-          <div key={book.id} className="book-card">
+          <div
+          key={book.id}
+          className="book-card"
+          onClick={() => navigate(`/book/${book.id}`)}
+          style={{ cursor: "pointer" }}
+        >
 
             <img
               src={`http://localhost:5000/${book.image_url}`}

@@ -3,7 +3,8 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Profile from "./pages/Profile";
-import Books from "./pages/Books"; // 🔥 не забудь імпорт
+import Books from "./pages/Books"; 
+import BookPage from "./pages/BookPage";
 
 import ProtectedLayout from "./layout/ProtectedLayout";
 
@@ -34,6 +35,7 @@ function App() {
           )
         }
       />
+      <Route path="/book/:id" element={<BookPage />} />
 
     </Routes>
   );
