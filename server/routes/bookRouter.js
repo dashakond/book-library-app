@@ -6,15 +6,15 @@ const authMiddleware = require('../middleware/authMiddleware')
 router.post('/', authMiddleware, bookController.createBook);
 
 // отримати всі книги
-router.get('/', bookController.getAllBooks)
+router.get('/', authMiddleware, bookController.getAllBooks)
 
 // отримати одну книгу
-router.get('/:id', bookController.getOneBook)
+router.get('/:id', authMiddleware, bookController.getOneBook)
 
 //  оновити книгу
-router.put('/:id', bookController.updateBook)
+router.put('/:id', authMiddleware, bookController.updateBook)
 
 //  видалити книгу
-router.delete('/:id', bookController.deleteBook)
+router.delete('/:id', authMiddleware, bookController.deleteBook)
 
 module.exports = router;
