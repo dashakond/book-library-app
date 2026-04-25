@@ -73,11 +73,14 @@ Collection.belongsTo(User, {
 // 📚 COLLECTION ↔ BOOK (M:N)
 Collection.belongsToMany(Book, {
     through: CollectionBook,
-    foreignKey: 'collectionId'
+    foreignKey: 'collectionId',
+    as: 'books'
 });
+
 Book.belongsToMany(Collection, {
     through: CollectionBook,
-    foreignKey: 'bookId'
+    foreignKey: 'bookId',
+    as: 'collections'
 });
 User.hasMany(Wishlist, {
     foreignKey: 'userId'

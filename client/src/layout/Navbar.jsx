@@ -13,6 +13,7 @@ function Navbar() {
       <div style={styles.left}>
         <Link to="/profile">Profile</Link>
         <Link to="/book">Books</Link>
+        <Link to="/collections">Collections</Link>
       </div>
 
       <button onClick={handleLogout} style={styles.btn}>

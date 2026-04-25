@@ -24,7 +24,10 @@ class CollectionController {
         try {
             const collections = await Collection.findAll({
                 where: { userId: req.user.id },
-                include: [Book]
+                include: [{
+                    model: Book,
+                    as: 'books'
+                }]
             });
 
             return res.json(collections);

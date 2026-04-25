@@ -5,6 +5,8 @@ import Register from "./pages/Register";
 import Profile from "./pages/Profile";
 import Books from "./pages/Books"; 
 import BookPage from "./pages/BookPage";
+import Collections from "./pages/Collections";
+import CollectionPage from "./pages/CollectionPage";
 
 import ProtectedLayout from "./layout/ProtectedLayout";
 
@@ -36,6 +38,11 @@ function App() {
         }
       />
       <Route path="/book/:id" element={<BookPage />} />
+      <Route element={<ProtectedLayout />}>
+     <Route path="/collections" element={<Collections />} />
+     <Route path="/collections/:id" element={<CollectionPage />} />
+     </Route>
+
 
     </Routes>
   );
