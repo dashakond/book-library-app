@@ -46,6 +46,25 @@ class WishlistController {
             return res.status(500).json({ message: e.message });
         }
     }
+    async update(req, res) {
+        try {
+            const { id } = req.params;
+
+            const item = await Wishlist.findOne({
+                where: { id, userId: req.user.id }
+            });
+
+            if (!item) {
+                return res.status(404).json({ message: "Not found" });
+            }
+
+            await item.update(req.body);
+
+            return res.json(item);
+        } catch (e) {
+            return res.status(500).json({ message: e.message });
+        }
+    }
 }
 
 module.exports = new WishlistController();
