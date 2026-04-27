@@ -5,19 +5,48 @@ function ReadingSessions() {
   const [sessions, setSessions] = useState([]);
   const [selected, setSelected] = useState(null);
 
-  // 📌 load sessions
-  useEffect(() => {
-    const fetchSessions = async () => {
-      try {
-        const res = await API.get("/sessions");
-        setSessions(res.data);
-      } catch (err) {
-        console.log(err);
-      }
-    };
+  const fetchSessions = async () => {
+    try {
+      const res = await API.get("/sessions");
+  
+      // 🔥 сортування: нові зверху
+      const sorted = res.data.sort((a, b) => {
+        return new Date(b.startTime) - new Date(a.startTime);
+      });
+  
+      setSessions(sorted);
+  
+    } catch (err) {
+      console.log(err);
+    }
+  };
 
+  // 📌 load sessions + live update
+  useEffect(() => {
     fetchSessions();
+
+    // 🔥 автооновлення (щоб нові сесії з’являлись)
+    const interval = setInterval(() => {
+      fetchSessions();
+    }, 5000); // кожні 5 сек
+
+    return () => clearInterval(interval);
   }, []);
+
+  // 🔥 FORMAT TIME (хв + сек)
+  const formatDuration = (start, end) => {
+    if (!start) return "0m 0s";
+
+    const startTime = new Date(start);
+    const endTime = end ? new Date(end) : new Date();
+
+    const diffMs = endTime - startTime;
+
+    const minutes = Math.floor(diffMs / 60000);
+    const seconds = Math.floor((diffMs % 60000) / 1000);
+
+    return `${minutes}m ${seconds}s`;
+  };
 
   return (
     <div style={styles.container}>
@@ -31,15 +60,17 @@ function ReadingSessions() {
             key={s.id}
             style={{
               ...styles.item,
-              background: selected?.id === s.id ? "#eee" : "#fff"
+              background: selected?.id === s.id ? "#f3f4f6" : "#fff"
             }}
             onClick={() => setSelected(s)}
           >
             <h4>{s.book?.title}</h4>
 
-            <p>⏱ {s.durationMinutes || 0} min</p>
+            <p>⏱ {formatDuration(s.startTime, s.endTime)}</p>
 
-            <p>{new Date(s.startTime).toLocaleDateString()}</p>
+            <p>
+              {new Date(s.startTime).toLocaleDateString()}
+            </p>
           </div>
         ))}
       </div>
@@ -67,7 +98,13 @@ function ReadingSessions() {
             <p>📄 Start page: {selected.startPage}</p>
             <p>📄 End page: {selected.endPage}</p>
 
-            <p>⏱ Time: {selected.durationMinutes} min</p>
+            <p>
+              ⏱ Time:{" "}
+              {formatDuration(
+                selected.startTime,
+                selected.endTime
+              )}
+            </p>
 
             <p>Status: {selected.status}</p>
           </>
@@ -99,10 +136,11 @@ const styles = {
 
   item: {
     border: "1px solid #ddd",
-    padding: 10,
+    padding: 12,
     marginBottom: 10,
-    borderRadius: 8,
-    cursor: "pointer"
+    borderRadius: 10,
+    cursor: "pointer",
+    transition: "0.2s"
   }
 };
 

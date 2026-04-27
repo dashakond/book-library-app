@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import API from "../api/axios";
 
-
 function Wishlist() {
   const [items, setItems] = useState([]);
 
@@ -12,6 +11,8 @@ function Wishlist() {
     link: "",
     note: ""
   });
+
+  const [errors, setErrors] = useState({});
 
   // 📌 load wishlist
   const fetchData = async () => {
@@ -27,10 +28,27 @@ function Wishlist() {
     fetchData();
   }, []);
 
+  // 🔥 VALIDATION
+  const validate = () => {
+    const newErrors = {};
+
+    if (!form.title.trim()) {
+      newErrors.title = "Title is required";
+    }
+
+    if (!form.author.trim()) {
+      newErrors.author = "Author is required";
+    }
+
+    setErrors(newErrors);
+
+    return Object.keys(newErrors).length === 0;
+  };
+
   // ➕ add item
   const addItem = async () => {
     try {
-      if (!form.title) return alert("Title required");
+      if (!validate()) return;
 
       await API.post("/wishlist", form);
 
@@ -42,7 +60,9 @@ function Wishlist() {
         note: ""
       });
 
+      setErrors({});
       fetchData();
+
     } catch (err) {
       console.log(err);
     }
@@ -62,8 +82,7 @@ function Wishlist() {
   const updateItem = async (id) => {
     try {
       const newTitle = prompt("Enter new title");
-
-      if (!newTitle) return;
+      if (!newTitle?.trim()) return;
 
       await API.put(`/wishlist/${id}`, {
         title: newTitle
@@ -75,70 +94,62 @@ function Wishlist() {
     }
   };
 
-  // download 
-  const downloadWishlist = () => {
-    const text = [
-      " МІЙ ВІШЛІСТ",
-      "====================",
-      "",
-      ...items.map((i, index) =>
-        `${index + 1}. ${i.title}
-  Автор: ${i.author || "-"}
-  Ціна: ${i.price || "-"} ${i.currency || "UAH"}
-  Посилання: ${i.link || "-"}
-  Нотатка: ${i.note || "-"}
-  --------------------`
-      )
-    ].join("\n");
-  
-    const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
-  
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "wishlist.txt";
-    a.click();
-  
-    URL.revokeObjectURL(url);
-  };
-
-
   return (
     <div style={{ padding: 20 }}>
       <h1>📌 My Wishlist</h1>
 
-      {/* ⬇️ DOWNLOAD */}
-      <button onClick={downloadWishlist} style={styles.downloadBtn}>
-        ⬇️ Download Wishlist
-      </button>
-
       {/* ➕ FORM */}
       <div style={styles.form}>
-        <input
-          placeholder="Title"
-          value={form.title}
-          onChange={(e) => setForm({ ...form, title: e.target.value })}
-        />
 
-        <input
-          placeholder="Author"
-          value={form.author}
-          onChange={(e) => setForm({ ...form, author: e.target.value })}
-        />
+        {/* TITLE */}
+        <div>
+          <input
+            placeholder="Title *"
+            value={form.title}
+            onChange={(e) =>
+              setForm({ ...form, title: e.target.value })
+            }
+            style={errors.title ? styles.errorInput : {}}
+          />
+          {errors.title && (
+            <p style={styles.errorText}>{errors.title}</p>
+          )}
+        </div>
+
+        {/* AUTHOR */}
+        <div>
+          <input
+            placeholder="Author *"
+            value={form.author}
+            onChange={(e) =>
+              setForm({ ...form, author: e.target.value })
+            }
+            style={errors.author ? styles.errorInput : {}}
+          />
+          {errors.author && (
+            <p style={styles.errorText}>{errors.author}</p>
+          )}
+        </div>
 
         <input
           placeholder="Price"
           value={form.price}
-          onChange={(e) => setForm({ ...form, price: e.target.value })}
+          onChange={(e) =>
+            setForm({ ...form, price: e.target.value })
+          }
         />
 
         <input
           placeholder="Link"
           value={form.link}
-          onChange={(e) => setForm({ ...form, link: e.target.value })}
+          onChange={(e) =>
+            setForm({ ...form, link: e.target.value })
+          }
         />
 
-        <button onClick={addItem}>Add</button>
+        <button onClick={addItem}>
+          Add
+        </button>
       </div>
 
       {/* 📚 LIST */}
@@ -146,7 +157,7 @@ function Wishlist() {
         <div key={item.id} style={styles.card}>
           <h3>{item.title}</h3>
           <p>{item.author}</p>
-          <p>{item.price} {item.currency}</p>
+          <p>{item.price}</p>
 
           {item.link && (
             <a href={item.link} target="_blank" rel="noreferrer">
@@ -157,8 +168,12 @@ function Wishlist() {
           <p>{item.note}</p>
 
           <div style={styles.actions}>
-            <button onClick={() => deleteItem(item.id)}>❌ Delete</button>
-            <button onClick={() => updateItem(item.id)}>✏️ Edit</button>
+            <button onClick={() => deleteItem(item.id)}>
+              ❌ Delete
+            </button>
+            <button onClick={() => updateItem(item.id)}>
+              ✏️ Edit
+            </button>
           </div>
         </div>
       ))}
@@ -169,27 +184,33 @@ function Wishlist() {
 const styles = {
   form: {
     display: "flex",
+    flexDirection: "column",
     gap: 10,
-    marginBottom: 20
+    marginBottom: 20,
+    maxWidth: 300
   },
+
   card: {
     border: "1px solid #ddd",
     padding: 10,
     marginBottom: 10,
     borderRadius: 8
   },
+
   actions: {
     marginTop: 10,
     display: "flex",
     gap: 10
   },
-  downloadBtn: {
-    marginBottom: 20,
-    padding: 10,
-    background: "#333",
-    color: "white",
-    border: "none",
-    cursor: "pointer"
+
+  errorText: {
+    color: "red",
+    fontSize: 12,
+    marginTop: 2
+  },
+
+  errorInput: {
+    border: "1px solid red"
   }
 };
 

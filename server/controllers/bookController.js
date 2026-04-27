@@ -1,4 +1,5 @@
-const { Book, Author, Genre } = require('../models/models');
+const { Book, Author, Genre, ReadingSession } = require('../models/models');
+const { Op } = require('sequelize');
 const { v4: uuidv4 } = require('uuid');
 const path = require('path');
 class BookController {
@@ -82,6 +83,33 @@ class BookController {
                     where: { userId: id },
                     include: [Author, Genre]
                 });
+            }
+
+            // 🔥 ABANDONED LOGIC (30 days)
+            for (let book of books) {
+
+                if (book.status === "finished") continue;
+
+                const lastSession = await ReadingSession.findOne({
+                    where: {
+                        bookId: book.id,
+                        userId: id
+                    },
+                    order: [
+                        ["endTime", "DESC"]
+                    ]
+                });
+
+                if (!lastSession || !lastSession.endTime) continue;
+
+                const daysDiff =
+                    (Date.now() - new Date(lastSession.endTime)) /
+                    (1000 * 60 * 60 * 24);
+
+                if (daysDiff > 30) {
+                    await book.update({ status: "abandoned" });
+                    book.status = "abandoned"; // щоб одразу відобразилось у UI
+                }
             }
 
             return res.json(books);

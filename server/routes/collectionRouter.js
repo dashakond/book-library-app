@@ -14,7 +14,7 @@ router.get('/', auth, controller.getMyCollections);
 router.post('/add-book', auth, controller.addBook);
 
 // ❌ remove book
-router.post('/remove-book', auth, controller.removeBook);
+router.delete('/:collectionId/books/:bookId', auth, controller.removeBook);
 
 // 🗑 delete collection
 router.delete('/:id', auth, controller.deleteCollection);

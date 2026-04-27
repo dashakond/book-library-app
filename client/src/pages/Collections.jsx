@@ -23,7 +23,7 @@ function Collections() {
 
   // ➕ create collection
   const handleCreate = async () => {
-    if (!name) return;
+    if (!name.trim()) return;
 
     try {
       await API.post("/collections", { name });
@@ -35,11 +35,23 @@ function Collections() {
     }
   };
 
+  // ❌ delete collection
+  const handleDelete = async (id, e) => {
+    e.stopPropagation(); // 🚫 щоб не відкривалась сторінка
+
+    try {
+      await API.delete(`/collections/${id}`);
+      fetchCollections();
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
   return (
     <div style={{ padding: 20 }}>
       <h1>My Collections 📚</h1>
 
-      {/* CREATE COLLECTION */}
+      {/* CREATE */}
       <div style={{ marginBottom: 20 }}>
         <input
           placeholder="Collection name"
@@ -62,9 +74,15 @@ function Collections() {
           >
             <h3>{col.name}</h3>
 
-            <p>
-              📚 {col.books?.length || 0} books
-            </p>
+            <p>📚 {col.books?.length || 0} books</p>
+
+            {/* ❌ DELETE BUTTON */}
+            <button
+              onClick={(e) => handleDelete(col.id, e)}
+              style={styles.deleteBtn}
+            >
+              Delete
+            </button>
           </div>
         ))}
       </div>
@@ -79,7 +97,18 @@ const styles = {
     border: "1px solid #ddd",
     borderRadius: 8,
     cursor: "pointer",
-    background: "#fff"
+    background: "#fff",
+    position: "relative"
+  },
+
+  deleteBtn: {
+    marginTop: 10,
+    background: "red",
+    color: "white",
+    border: "none",
+    padding: "5px 10px",
+    borderRadius: 5,
+    cursor: "pointer"
   }
 };
 

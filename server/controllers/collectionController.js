@@ -65,7 +65,7 @@ class CollectionController {
     // ❌ REMOVE BOOK FROM COLLECTION
     async removeBook(req, res) {
         try {
-            const { collectionId, bookId } = req.body;
+            const { collectionId, bookId } = req.params;
 
             const collection = await Collection.findOne({
                 where: {
@@ -80,7 +80,7 @@ class CollectionController {
 
             await collection.removeBook(bookId);
 
-            return res.json({ message: "Book removed" });
+            return res.json({ message: "Book removed from collection" });
 
         } catch (e) {
             return res.status(500).json({ message: e.message });

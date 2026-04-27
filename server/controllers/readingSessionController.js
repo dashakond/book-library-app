@@ -2,11 +2,20 @@ const { ReadingSession, Book } = require('../models/models');
 
 class ReadingSessionController {
 
+    // 🔒 helper
+    safeNumber(value) {
+        const num = Number(value);
+        return isNaN(num) || num < 0 ? 0 : num;
+    }
+
     // ▶ START SESSION
     async startSession(req, res) {
         try {
             const { bookId, startPage } = req.body;
 
+            const safeStart = Math.max(0, Number(startPage));
+
+            // 🔥 закриваємо стару активну сесію
             await ReadingSession.update({
                 status: 'finished',
                 endTime: new Date()
@@ -20,12 +29,11 @@ class ReadingSessionController {
             const session = await ReadingSession.create({
                 userId: req.user.id,
                 bookId,
-                startPage,
+                startPage: safeStart,
                 startTime: new Date(),
                 status: 'active'
             });
 
-            // 🔥 NEW: book becomes "reading"
             await Book.update({ status: "reading" }, { where: { id: bookId } });
 
             return res.json(session);
@@ -38,7 +46,7 @@ class ReadingSessionController {
     // ⏹ END SESSION
     async endActiveSession(req, res) {
         try {
-            const { endPage } = req.body;
+            const endPage = Math.max(0, Number(req.body.endPage));
 
             const session = await ReadingSession.findOne({
                 where: {
@@ -52,6 +60,12 @@ class ReadingSessionController {
 
             if (!session) {
                 return res.status(404).json({ message: "Active session not found" });
+            }
+
+            if (endPage < session.startPage) {
+                return res.status(400).json({
+                    message: "End page cannot be less than start page"
+                });
             }
 
             const endTime = new Date();
@@ -71,7 +85,6 @@ class ReadingSessionController {
 
             const book = await Book.findByPk(session.bookId);
 
-            // 📌 CASE 1: finished reading
             if (book.pages && endPage >= book.pages) {
                 await book.update({ status: "finished" });
             } else {
@@ -85,7 +98,7 @@ class ReadingSessionController {
         }
     }
 
-    // 📊 GET MY SESSIONS
+    // 📊 GET ALL SESSIONS
     async getMySessions(req, res) {
         try {
             const sessions = await ReadingSession.findAll({
@@ -97,6 +110,26 @@ class ReadingSessionController {
 
         } catch (e) {
             return res.status(500).json({ message: "Error fetching sessions" });
+        }
+    }
+
+    // ⭐ NEW: last session for book
+    async getLastSessionForBook(req, res) {
+        try {
+            const session = await ReadingSession.findOne({
+                where: {
+                    userId: req.user.id,
+                    bookId: req.params.bookId
+                },
+                order: [
+                    ['startTime', 'DESC']
+                ]
+            });
+
+            return res.json(session);
+
+        } catch (e) {
+            return res.status(500).json({ message: e.message });
         }
     }
 }

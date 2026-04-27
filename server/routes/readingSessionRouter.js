@@ -8,5 +8,6 @@ const auth = require('../middleware/authMiddleware');
 router.post('/start', auth, readingSessionController.startSession);
 router.post('/end', auth, readingSessionController.endActiveSession);;
 router.get('/', auth, readingSessionController.getMySessions);
+router.get('/last/:bookId', auth, readingSessionController.getLastSessionForBook);
 
 module.exports = router;
