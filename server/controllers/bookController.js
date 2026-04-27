@@ -9,6 +9,7 @@ class BookController {
                 title,
                 description,
                 shelf,
+                pages,
                 userId
             } = req.body;
 
@@ -54,7 +55,8 @@ class BookController {
                 genreId: genre.id,
                 shelf,
                 userId: req.user.id,
-                image_url: fileName
+                image_url: fileName,
+                pages
             });
 
             return res.json(book);
@@ -138,9 +140,7 @@ class BookController {
             const { role, id: userId } = req.user;
 
             const book = await Book.findOne({
-                where: role === 'ADMIN' ?
-                    { id: req.params.id } :
-                    { id: req.params.id, userId }
+                where: role === 'ADMIN' ? { id: req.params.id } : { id: req.params.id, userId }
             });
 
             if (!book) {

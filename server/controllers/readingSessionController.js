@@ -7,7 +7,6 @@ class ReadingSessionController {
         try {
             const { bookId, startPage } = req.body;
 
-            // 🔥 1. закрити всі активні сесії користувача
             await ReadingSession.update({
                 status: 'finished',
                 endTime: new Date()
@@ -18,7 +17,6 @@ class ReadingSessionController {
                 }
             });
 
-            // 🔥 2. створити нову
             const session = await ReadingSession.create({
                 userId: req.user.id,
                 bookId,
@@ -26,6 +24,9 @@ class ReadingSessionController {
                 startTime: new Date(),
                 status: 'active'
             });
+
+            // 🔥 NEW: book becomes "reading"
+            await Book.update({ status: "reading" }, { where: { id: bookId } });
 
             return res.json(session);
 
@@ -39,7 +40,6 @@ class ReadingSessionController {
         try {
             const { endPage } = req.body;
 
-            // 🔥 знайти активну сесію користувача
             const session = await ReadingSession.findOne({
                 where: {
                     userId: req.user.id,
@@ -56,16 +56,27 @@ class ReadingSessionController {
 
             const endTime = new Date();
 
-            const duration = Math.floor(
-                (endTime - new Date(session.startTime)) / 1000 / 60
+            const durationSeconds = Math.floor(
+                (endTime - new Date(session.startTime)) / 1000
             );
+
+            const durationMinutes = Math.floor(durationSeconds / 60);
 
             await session.update({
                 endPage,
                 endTime,
-                durationMinutes: duration,
+                durationMinutes,
                 status: 'finished'
             });
+
+            const book = await Book.findByPk(session.bookId);
+
+            // 📌 CASE 1: finished reading
+            if (book.pages && endPage >= book.pages) {
+                await book.update({ status: "finished" });
+            } else {
+                await book.update({ status: "reading" });
+            }
 
             return res.json(session);
 

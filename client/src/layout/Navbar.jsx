@@ -16,6 +16,7 @@ function Navbar() {
         <Link to="/collections">Collections</Link>
         <Link to="/wishlist">Wishlist</Link>
         <Link to="/goals">Goals</Link>
+        <Link to="/sessions">History Sessions</Link>
       </div>
 
       <button onClick={handleLogout} style={styles.btn}>

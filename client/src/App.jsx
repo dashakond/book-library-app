@@ -9,6 +9,7 @@ import Collections from "./pages/Collections";
 import CollectionPage from "./pages/CollectionPage";
 import Wishlist from "./pages/Wishlist";
 import Goals from "./pages/Goals";
+import ReadingSessions from "./pages/ReadingHistory";
 
 import ProtectedLayout from "./layout/ProtectedLayout";
 
@@ -34,6 +35,9 @@ function App() {
         <Route path="/wishlist" element={<Wishlist />} />
 
         <Route path="/goals" element={<Goals />} />
+
+        <Route path="/sessions" element={<ReadingSessions />} />
+
       </Route>
 
       {/* redirect */}

@@ -27,6 +27,11 @@ const Book = sequelize.define('book', {
             // not_read | reading | finished | abandoned
     },
     image_url: { type: DataTypes.TEXT },
+    pages: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        defaultValue: 0
+    }
 }, {
     tableName: 'books',
     timestamps: true
