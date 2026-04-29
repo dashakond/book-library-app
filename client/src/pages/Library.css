@@ -1,63 +1,91 @@
 .library-page {
-    padding: 30px;
-    font-family: Arial;
-    background: #f6f6f6;
+    padding: 40px;
+    font-family: "Inter", Arial, sans-serif;
+    background: linear-gradient(180deg, #fdf1e7 0%, #fffaf5 100%);
     min-height: 100vh;
+    color: #111827;
 }
 
 .books-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-    gap: 20px;
-    margin-top: 20px;
+    grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+    gap: 22px;
+    margin-top: 25px;
 }
 
+
+/* 📚 CARD */
+
 .book-card {
-    background: white;
-    border-radius: 12px;
+    background: #ffffff;
+    border-radius: 16px;
     overflow: hidden;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-    transition: 0.2s;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
+    transition: all 0.25s ease;
+    border: 1px solid #f1f1f1;
 }
 
 .book-card:hover {
-    transform: translateY(-4px);
+    transform: translateY(-6px);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.10);
 }
+
+
+/* 🖼 image */
 
 .book-card img {
     width: 100%;
     height: 260px;
     object-fit: cover;
+    transition: 0.3s;
 }
 
+.book-card:hover img {
+    transform: scale(1.02);
+}
+
+
+/* ℹ️ info */
+
 .book-info {
-    padding: 12px;
+    padding: 14px;
 }
 
 .book-info h3 {
     margin: 0;
     font-size: 16px;
+    font-weight: 600;
+    color: #111827;
 }
+
+
+/* 📌 status base */
 
 .status {
     display: inline-block;
     margin-top: 10px;
-    padding: 4px 8px;
-    border-radius: 6px;
+    padding: 5px 10px;
+    border-radius: 999px;
     font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.3px;
 }
 
 
-/* статуси як у Goodreads */
+/* 🎯 STATUS COLORS (modern soft style) */
 
 .status.not_read {
-    background: #eee;
+    background: #f3f4f6;
+    color: #6b7280;
 }
 
 .status.reading {
-    background: #ffe08a;
+    background: rgba(255, 140, 0, 0.12);
+    /* 🔶 soft orange */
+    color: #f97316;
 }
 
 .status.finished {
-    background: #b6f2c2;
+    background: rgba(34, 197, 94, 0.12);
+    color: #22c55e;
 }

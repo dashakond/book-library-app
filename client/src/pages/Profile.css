@@ -1,0 +1,126 @@
+/* 🌍 PAGE */
+
+.profile-page {
+    padding: 30px;
+    min-height: 100vh;
+    background: linear-gradient(180deg, #fff7ed, #ffedd5);
+    font-family: "Inter", sans-serif;
+    animation: fadeIn 0.4s ease;
+}
+
+
+/* TITLE */
+
+.profile-title {
+    font-size: 28px;
+    margin-bottom: 20px;
+}
+
+
+/* SECTION TITLE */
+
+.section-title {
+    margin-top: 25px;
+    margin-bottom: 10px;
+    color: #9a3412;
+}
+
+
+/* 📊 GRID */
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 12px;
+}
+
+
+/* 🧡 STAT CARD */
+
+.stat-card {
+    background: rgba(255, 255, 255, 0.8);
+    border: 1px solid rgba(249, 115, 22, 0.2);
+    padding: 16px;
+    border-radius: 16px;
+    font-weight: 600;
+    transition: 0.25s;
+    cursor: default;
+    animation: pop 0.3s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 20px rgba(249, 115, 22, 0.15);
+}
+
+
+/* 📚 LIST BLOCK */
+
+.list-block {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+
+/* ITEM */
+
+.list-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 14px;
+    background: white;
+    border-radius: 12px;
+    border: 1px solid rgba(249, 115, 22, 0.15);
+    transition: 0.2s;
+}
+
+.list-item:hover {
+    transform: translateX(4px);
+    background: #fff7ed;
+}
+
+
+/* 🚪 LOGOUT */
+
+.logout-btn {
+    margin-top: 30px;
+    padding: 12px 18px;
+    border: none;
+    border-radius: 12px;
+    background: #ef4444;
+    color: white;
+    font-weight: 700;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.logout-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 20px rgba(239, 68, 68, 0.25);
+}
+
+
+/* ✨ ANIMATION */
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes pop {
+    from {
+        transform: scale(0.95);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}

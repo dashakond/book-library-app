@@ -3,7 +3,7 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Profile from "./pages/Profile";
-import Books from "./pages/Books"; 
+import Books from "./pages/Books";
 import BookPage from "./pages/BookPage";
 import Collections from "./pages/Collections";
 import CollectionPage from "./pages/CollectionPage";
@@ -23,7 +23,7 @@ function App() {
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
 
-      {/* 🔐 protected (ВСІ сторінки тут) */}
+      {/* 🔐 protected */}
       <Route element={<ProtectedLayout />}>
         <Route path="/profile" element={<Profile />} />
         <Route path="/book" element={<Books />} />
@@ -33,11 +33,8 @@ function App() {
         <Route path="/collections/:id" element={<CollectionPage />} />
 
         <Route path="/wishlist" element={<Wishlist />} />
-
         <Route path="/goals" element={<Goals />} />
-
         <Route path="/sessions" element={<ReadingSessions />} />
-
       </Route>
 
       {/* redirect */}

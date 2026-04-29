@@ -1,0 +1,170 @@
+/* 🧱 GRID */
+
+.library-page {
+    padding: 30px;
+    min-height: 100vh;
+    background: linear-gradient(180deg, #fff7ed 0%, #ffedd5 100%);
+    font-family: "Inter", sans-serif;
+}
+
+.books-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+    gap: 22px;
+    border: 20px;
+    /* 🔥 більше простору між картками */
+}
+
+
+/* 📚 CARD (BALANCED) */
+
+.book-card {
+    position: relative;
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(12px);
+    border-radius: 16px;
+    overflow: hidden;
+    border: 1px solid rgba(249, 115, 22, 0.15);
+    transition: all 0.3s ease;
+    animation: fadeUp 0.35s ease forwards;
+    display: flex;
+    flex-direction: column;
+}
+
+.book-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 25px rgba(249, 115, 22, 0.18);
+}
+
+
+/* 📷 IMAGE */
+
+.book-card img {
+    width: 100%;
+    height: 180px;
+    /* 🔥 трохи більше для читабельності */
+    object-fit: cover;
+    transition: transform 0.35s ease;
+}
+
+.book-card:hover img {
+    transform: scale(1.04);
+}
+
+
+/* ℹ️ INFO */
+
+.book-info {
+    padding: 14px;
+    /* 🔥 більше повітря */
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+
+/* TITLE */
+
+.book-info h3 {
+    font-size: 16px;
+    /* 🔥 читабельніше */
+    font-weight: 700;
+    margin: 0;
+    line-height: 1.3;
+}
+
+
+/* TEXT */
+
+.book-info p {
+    font-size: 13px;
+    margin: 0;
+    color: #555;
+    line-height: 1.4;
+}
+
+
+/* LABEL */
+
+.label {
+    font-weight: 600;
+    color: #444;
+}
+
+
+/* STATUS */
+
+.status {
+    width: fit-content;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+
+/* ➕ BUTTON */
+
+.add-btn-book {
+    width: 200px;
+    height: 50px;
+    ;
+    display: inline-block;
+    margin-top: 10px;
+    padding: 8px 12px;
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    background: linear-gradient(90deg, #f97316, #fb923c);
+    color: white;
+    text-align: center;
+    border-color: #f97316;
+}
+
+.add-btn-book:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(249, 115, 22, 0.25);
+}
+
+
+/* 📌 DROPDOWN */
+
+.dropdown {
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+    right: 10px;
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid #eee;
+    animation: dropdownIn 0.2s ease;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08);
+}
+
+.option {
+    padding: 10px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.option:hover {
+    background: #fff7ed;
+    transform: translateX(3px);
+}
+
+
+/* ✨ ANIMATION */
+
+@keyframes fadeUp {
+    from {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

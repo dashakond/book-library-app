@@ -1,0 +1,225 @@
+.wishlist-page {
+    padding: 30px;
+    background: linear-gradient(180deg, #fff7ed, #ffedd5);
+    min-height: 100vh;
+}
+
+
+/* HEADER */
+
+.wishlist-header {
+    gap: 20px;
+    align-items: center;
+}
+
+
+/* ADD BUTTON */
+
+.add-btn {
+    width: 300px;
+    height: 50px;
+    border-radius: 18px;
+    border: none;
+    background: #f97316;
+    color: white;
+    cursor: pointer;
+    font-weight: 800;
+    transition: 0.2s;
+}
+
+.add-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(249, 115, 22, 0.3);
+}
+
+
+/* FORM */
+
+.wishlist-form {
+    margin-top: 20px;
+    max-width: 400px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.7);
+    border-radius: 16px;
+}
+
+
+/* ANIMATION */
+
+.fade-in {
+    animation: fade 0.3s ease;
+}
+
+@keyframes fade {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+
+/* INPUT */
+
+.wishlist-form input {
+    padding: 12px;
+    border-radius: 10px;
+    border: 1px solid #fed7aa;
+}
+
+.wishlist-form button {
+    padding: 12px;
+    border-radius: 10px;
+    background: #f97316;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+
+/* GRID */
+
+.wishlist-grid {
+    margin-top: 30px;
+    display: grid;
+    /* 🔥 КЛЮЧОВЕ */
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+}
+
+
+/* CARD */
+
+.wishlist-card {
+    padding: 20px;
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.75);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(249, 115, 22, 0.15);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    position: relative;
+    transition: all 0.25s ease;
+    /* стартова анімація */
+    opacity: 0;
+    transform: translateY(10px);
+    animation: cardIn 0.4s ease forwards;
+}
+
+.wishlist-card:hover {
+    transform: translateY(-6px) scale(1.01);
+    border: 1px solid rgba(249, 115, 22, 0.5);
+    box-shadow: 0 10px 25px rgba(249, 115, 22, 0.15), 0 0 0 1px rgba(249, 115, 22, 0.08);
+}
+
+
+/* 🔥 title */
+
+.wishlist-card h3 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 700;
+    color: #111827;
+    word-break: break-word;
+}
+
+
+/* 📄 text */
+
+.wishlist-card p {
+    margin: 0;
+    font-size: 14px;
+    color: #6b7280;
+    word-break: break-word;
+}
+
+
+/* 💰 price badge */
+
+.price {
+    display: inline-block;
+    margin-top: 6px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+    background: rgba(249, 115, 22, 0.12);
+    color: #f97316;
+}
+
+
+/* 🔗 link */
+
+.wishlist-card a {
+    margin-top: 4px;
+    font-size: 13px;
+    color: #f97316;
+    text-decoration: none;
+    transition: 0.2s;
+}
+
+.wishlist-card a:hover {
+    text-decoration: underline;
+}
+
+
+/* 🧨 ACTION BUTTONS */
+
+.actions {
+    margin-top: auto;
+    display: flex;
+    gap: 10px;
+}
+
+.actions button {
+    flex: 1;
+    padding: 8px;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+
+/* edit */
+
+.actions button:first-child {
+    background: rgba(249, 115, 22, 0.12);
+    color: #f97316;
+}
+
+.actions button:first-child:hover {
+    background: rgba(249, 115, 22, 0.25);
+    transform: translateY(-2px);
+}
+
+
+/* delete */
+
+.actions button:last-child {
+    background: rgba(239, 68, 68, 0.12);
+    color: #ef4444;
+}
+
+.actions button:last-child:hover {
+    background: rgba(239, 68, 68, 0.2);
+    transform: translateY(-2px);
+}
+
+
+/* ✨ ANIMATION */
+
+@keyframes cardIn {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

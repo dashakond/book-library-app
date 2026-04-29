@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 import API from "../api/axios";
+import "./Wishlist.css";
 
 function Wishlist() {
   const [items, setItems] = useState([]);
+  const [showForm, setShowForm] = useState(false); // 🔥 NEW
 
   const [form, setForm] = useState({
     title: "",
@@ -14,7 +16,6 @@ function Wishlist() {
 
   const [errors, setErrors] = useState({});
 
-  // 📌 load wishlist
   const fetchData = async () => {
     try {
       const res = await API.get("/wishlist");
@@ -28,24 +29,16 @@ function Wishlist() {
     fetchData();
   }, []);
 
-  // 🔥 VALIDATION
   const validate = () => {
     const newErrors = {};
 
-    if (!form.title.trim()) {
-      newErrors.title = "Title is required";
-    }
-
-    if (!form.author.trim()) {
-      newErrors.author = "Author is required";
-    }
+    if (!form.title.trim()) newErrors.title = "Title is required";
+    if (!form.author.trim()) newErrors.author = "Author is required";
 
     setErrors(newErrors);
-
     return Object.keys(newErrors).length === 0;
   };
 
-  // ➕ add item
   const addItem = async () => {
     try {
       if (!validate()) return;
@@ -61,157 +54,113 @@ function Wishlist() {
       });
 
       setErrors({});
+      setShowForm(false); // 🔥 ховаємо після додавання
       fetchData();
-
     } catch (err) {
       console.log(err);
     }
   };
 
-  // ❌ delete
   const deleteItem = async (id) => {
-    try {
-      await API.delete(`/wishlist/${id}`);
-      fetchData();
-    } catch (err) {
-      console.log(err);
-    }
+    await API.delete(`/wishlist/${id}`);
+    fetchData();
   };
 
-  // ✏️ edit
   const updateItem = async (id) => {
-    try {
-      const newTitle = prompt("Enter new title");
-      if (!newTitle?.trim()) return;
+    const newTitle = prompt("Enter new title");
+    if (!newTitle?.trim()) return;
 
-      await API.put(`/wishlist/${id}`, {
-        title: newTitle
-      });
-
-      fetchData();
-    } catch (err) {
-      console.log(err);
-    }
+    await API.put(`/wishlist/${id}`, { title: newTitle });
+    fetchData();
   };
 
   return (
-    <div style={{ padding: 20 }}>
-      <h1>📌 My Wishlist</h1>
+    <div className="wishlist-page">
+      <div className="wishlist-header">
+        <h1>My Wishlist</h1>
 
-      {/* ➕ FORM */}
-      <div style={styles.form}>
+        <button
+          className="add-btn"
+          onClick={() => setShowForm(!showForm)}
+        >
+          + Add book
+        </button>
+      </div>
 
-        {/* TITLE */}
-        <div>
+      {/* 🔥 FORM (toggle) */}
+      {showForm && (
+        <div className="wishlist-form fade-in">
+
           <input
             placeholder="Title *"
             value={form.title}
             onChange={(e) =>
               setForm({ ...form, title: e.target.value })
             }
-            style={errors.title ? styles.errorInput : {}}
+            className={errors.title ? "error" : ""}
           />
-          {errors.title && (
-            <p style={styles.errorText}>{errors.title}</p>
-          )}
-        </div>
+          {errors.title && <span>{errors.title}</span>}
 
-        {/* AUTHOR */}
-        <div>
           <input
             placeholder="Author *"
             value={form.author}
             onChange={(e) =>
               setForm({ ...form, author: e.target.value })
             }
-            style={errors.author ? styles.errorInput : {}}
+            className={errors.author ? "error" : ""}
           />
-          {errors.author && (
-            <p style={styles.errorText}>{errors.author}</p>
-          )}
+          {errors.author && <span>{errors.author}</span>}
+
+          <input
+            placeholder="Price"
+            value={form.price}
+            onChange={(e) =>
+              setForm({ ...form, price: e.target.value })
+            }
+          />
+
+          <input
+            placeholder="Link"
+            value={form.link}
+            onChange={(e) =>
+              setForm({ ...form, link: e.target.value })
+            }
+          />
+
+          <button onClick={addItem}>
+            Save
+          </button>
         </div>
+      )}
 
-        <input
-          placeholder="Price"
-          value={form.price}
-          onChange={(e) =>
-            setForm({ ...form, price: e.target.value })
-          }
-        />
+      {/* 📚 GRID */}
+      <div className="wishlist-grid">
+        {items.map((item) => (
+          <div key={item.id} className="wishlist-card">
+            <h3>{item.title}</h3>
+            <p>{item.author}</p>
 
-        <input
-          placeholder="Link"
-          value={form.link}
-          onChange={(e) =>
-            setForm({ ...form, link: e.target.value })
-          }
-        />
+            {item.price && <span className="price">{item.price}</span>}
 
-        <button onClick={addItem}>
-          Add
-        </button>
-      </div>
+            {item.link && (
+              <a href={item.link} target="_blank">
+                🔗 Open
+              </a>
+            )}
 
-      {/* 📚 LIST */}
-      {items.map((item) => (
-        <div key={item.id} style={styles.card}>
-          <h3>{item.title}</h3>
-          <p>{item.author}</p>
-          <p>{item.price}</p>
-
-          {item.link && (
-            <a href={item.link} target="_blank" rel="noreferrer">
-              🔗 Open
-            </a>
-          )}
-
-          <p>{item.note}</p>
-
-          <div style={styles.actions}>
-            <button onClick={() => deleteItem(item.id)}>
-              ❌ Delete
-            </button>
-            <button onClick={() => updateItem(item.id)}>
-              ✏️ Edit
-            </button>
+            <div className="actions">
+              <button onClick={() => updateItem(item.id)}>
+                ✏️
+              </button>
+              <button onClick={() => deleteItem(item.id)}>
+                ❌
+              </button>
+            </div>
           </div>
-        </div>
-      ))}
+        ))}
+      </div>
     </div>
   );
 }
-
-const styles = {
-  form: {
-    display: "flex",
-    flexDirection: "column",
-    gap: 10,
-    marginBottom: 20,
-    maxWidth: 300
-  },
-
-  card: {
-    border: "1px solid #ddd",
-    padding: 10,
-    marginBottom: 10,
-    borderRadius: 8
-  },
-
-  actions: {
-    marginTop: 10,
-    display: "flex",
-    gap: 10
-  },
-
-  errorText: {
-    color: "red",
-    fontSize: 12,
-    marginTop: 2
-  },
-
-  errorInput: {
-    border: "1px solid red"
-  }
-};
 
 export default Wishlist;

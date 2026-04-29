@@ -1,25 +1,33 @@
 import { Navigate, Outlet } from "react-router-dom";
-import Navbar from "./Navbar";
+import AppSidebar from "./AppSidebar";
 
 function ProtectedLayout() {
   const token = localStorage.getItem("token");
 
-  // ❌ якщо не авторизований
-  if (!token) {
-    return <Navigate to="/login" />;
-  }
+  if (!token) return <Navigate to="/login" />;
 
   return (
-    <div>
-      {/* 🔝 меню */}
-      <Navbar />
+    <div style={styles.layout}>
+      <AppSidebar />
 
-      {/* 📄 сторінки всередині */}
-      <div style={{ padding: "20px" }}>
+      <div style={styles.content}>
         <Outlet />
       </div>
     </div>
   );
 }
+
+const styles = {
+  layout: {
+    display: "flex",
+    height: "100vh"
+  },
+
+  content: {
+    flex: 1,
+    padding: "0px",
+    overflowY: "auto"
+  }
+};
 
 export default ProtectedLayout;

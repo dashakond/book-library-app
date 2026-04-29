@@ -1,13 +1,13 @@
 import { useEffect, useState } from "react";
 import API from "../api/axios";
 import { useNavigate } from "react-router-dom";
+import "./Collections.css";
 
 function Collections() {
   const [collections, setCollections] = useState([]);
   const [name, setName] = useState("");
   const navigate = useNavigate();
 
-  // 📌 load collections
   const fetchCollections = async () => {
     try {
       const res = await API.get("/collections");
@@ -21,13 +21,11 @@ function Collections() {
     fetchCollections();
   }, []);
 
-  // ➕ create collection
   const handleCreate = async () => {
     if (!name.trim()) return;
 
     try {
       await API.post("/collections", { name });
-
       setName("");
       fetchCollections();
     } catch (err) {
@@ -35,9 +33,8 @@ function Collections() {
     }
   };
 
-  // ❌ delete collection
   const handleDelete = async (id, e) => {
-    e.stopPropagation(); // 🚫 щоб не відкривалась сторінка
+    e.stopPropagation();
 
     try {
       await API.delete(`/collections/${id}`);
@@ -48,68 +45,52 @@ function Collections() {
   };
 
   return (
-    <div style={{ padding: 20 }}>
-      <h1>My Collections 📚</h1>
+    <div className="collections-page">
+      <h1>My Collections </h1>
 
       {/* CREATE */}
-      <div style={{ marginBottom: 20 }}>
+      <div className="create-box">
         <input
-          placeholder="Collection name"
+          placeholder="Enter collection name..."
           value={name}
           onChange={(e) => setName(e.target.value)}
         />
 
-        <button onClick={handleCreate} style={{ marginLeft: 10 }}>
-          Create
+        <button onClick={handleCreate}>
+          + Create
         </button>
       </div>
 
       {/* LIST */}
-      <div>
-        {collections.map((col) => (
-          <div
-            key={col.id}
-            style={styles.card}
-            onClick={() => navigate(`/collections/${col.id}`)}
-          >
-            <h3>{col.name}</h3>
-
-            <p>📚 {col.books?.length || 0} books</p>
-
-            {/* ❌ DELETE BUTTON */}
-            <button
-              onClick={(e) => handleDelete(col.id, e)}
-              style={styles.deleteBtn}
+      {collections.length === 0 ? (
+        <div className="empty-state">
+          📚 No collections yet
+        </div>
+      ) : (
+        <div className="collections-grid">
+          {collections.map((col) => (
+            <div
+              key={col.id}
+              className="collection-card"
+              onClick={() => navigate(`/collections/${col.id}`)}
             >
-              Delete
-            </button>
-          </div>
-        ))}
-      </div>
+              <div className="card-top">
+                <h3>{col.name}</h3>
+                <span>{col.books?.length || 0} books</span>
+              </div>
+
+              <button
+                onClick={(e) => handleDelete(col.id, e)}
+                className="delete-btn"
+              >
+                Delete
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
-
-const styles = {
-  card: {
-    padding: 15,
-    marginBottom: 10,
-    border: "1px solid #ddd",
-    borderRadius: 8,
-    cursor: "pointer",
-    background: "#fff",
-    position: "relative"
-  },
-
-  deleteBtn: {
-    marginTop: 10,
-    background: "red",
-    color: "white",
-    border: "none",
-    padding: "5px 10px",
-    borderRadius: 5,
-    cursor: "pointer"
-  }
-};
 
 export default Collections;

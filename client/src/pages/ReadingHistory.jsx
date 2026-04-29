@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import API from "../api/axios";
+import "./ReadingHistory.css"
 
 function ReadingSessions() {
   const [sessions, setSessions] = useState([]);
@@ -9,7 +10,6 @@ function ReadingSessions() {
     try {
       const res = await API.get("/sessions");
   
-      // 🔥 сортування: нові зверху
       const sorted = res.data.sort((a, b) => {
         return new Date(b.startTime) - new Date(a.startTime);
       });
@@ -21,19 +21,16 @@ function ReadingSessions() {
     }
   };
 
-  // 📌 load sessions + live update
   useEffect(() => {
     fetchSessions();
-
-    // 🔥 автооновлення (щоб нові сесії з’являлись)
     const interval = setInterval(() => {
       fetchSessions();
-    }, 5000); // кожні 5 сек
+    }, 5000); 
 
     return () => clearInterval(interval);
   }, []);
 
-  // 🔥 FORMAT TIME (хв + сек)
+
   const formatDuration = (start, end) => {
     if (!start) return "0m 0s";
 
@@ -49,99 +46,90 @@ function ReadingSessions() {
   };
 
   return (
-    <div style={styles.container}>
-      
-      {/* 📚 LEFT: LIST */}
-      <div style={styles.list}>
-        <h2>📖 Sessions</h2>
+  <div className="sessions-page">
 
-        {sessions.map((s) => (
-          <div
-            key={s.id}
-            style={{
-              ...styles.item,
-              background: selected?.id === s.id ? "#f3f4f6" : "#fff"
-            }}
-            onClick={() => setSelected(s)}
-          >
-            <h4>{s.book?.title}</h4>
+    {/* LEFT */}
+    <div className="sessions-list">
+      <h2>📖 Sessions</h2>
 
-            <p>⏱ {formatDuration(s.startTime, s.endTime)}</p>
+      {sessions.map((s) => (
+        <div
+          key={s.id}
+          className={`session-card ${selected?.id === s.id ? "active" : ""}`}
+          onClick={() => setSelected(s)}
+        >
+          <h4>{s.book?.title}</h4>
 
-            <p>
-              {new Date(s.startTime).toLocaleDateString()}
-            </p>
-          </div>
-        ))}
-      </div>
+          <p>⏱ {formatDuration(s.startTime, s.endTime)}</p>
 
-      {/* 📊 RIGHT: DETAILS */}
-      <div style={styles.details}>
-        {selected ? (
-          <>
-            <h2>📖 Session Details</h2>
-
-            <h3>{selected.book?.title}</h3>
-
-            <p>
-              📅 Start:{" "}
-              {new Date(selected.startTime).toLocaleString()}
-            </p>
-
-            <p>
-              📅 End:{" "}
-              {selected.endTime
-                ? new Date(selected.endTime).toLocaleString()
-                : "Active"}
-            </p>
-
-            <p>📄 Start page: {selected.startPage}</p>
-            <p>📄 End page: {selected.endPage}</p>
-
-            <p>
-              ⏱ Time:{" "}
-              {formatDuration(
-                selected.startTime,
-                selected.endTime
-              )}
-            </p>
-
-            <p>Status: {selected.status}</p>
-          </>
-        ) : (
-          <p>👈 Select session to view details</p>
-        )}
-      </div>
+          <p className="date">
+            {new Date(s.startTime).toLocaleDateString()}
+          </p>
+        </div>
+      ))}
     </div>
-  );
+
+    {/* RIGHT */}
+    <div className="session-details">
+      {selected ? (
+      <div className="details-card fade-in">
+
+  {/* HEADER */}
+  <div className="details-header">
+    <div>
+      <h2>📖 Session Details</h2>
+      <h3>{selected.book?.title}</h3>
+    </div>
+
+    <span className={`status-badge ${selected.status}`}>
+      {selected.status}
+    </span>
+  </div>
+
+  {/* INFO GRID */}
+  <div className="details-grid">
+
+    <div className="detail-item">
+      <span>📅 Start</span>
+      <p>{new Date(selected.startTime).toLocaleString()}</p>
+    </div>
+
+    <div className="detail-item">
+      <span>📅 End</span>
+      <p>
+        {selected.endTime
+          ? new Date(selected.endTime).toLocaleString()
+          : "Active 🔥"}
+      </p>
+    </div>
+
+    <div className="detail-item">
+      <span>📄 Start page</span>
+      <p>{selected.startPage}</p>
+    </div>
+
+    <div className="detail-item">
+      <span>📄 End page</span>
+      <p>{selected.endPage}</p>
+    </div>
+
+    <div className="detail-item full">
+      <span>⏱ Duration</span>
+      <p>{formatDuration(selected.startTime, selected.endTime)}</p>
+    </div>
+
+  </div>
+
+</div>
+      ) : (
+        <p className="empty">👈 Select session to view details</p>
+      )}
+    </div>
+
+  </div>
+);
 }
 
-const styles = {
-  container: {
-    display: "flex",
-    gap: 20,
-    padding: 20
-  },
 
-  list: {
-    width: "40%",
-    borderRight: "1px solid #ddd",
-    paddingRight: 10
-  },
-
-  details: {
-    width: "60%",
-    padding: 10
-  },
-
-  item: {
-    border: "1px solid #ddd",
-    padding: 12,
-    marginBottom: 10,
-    borderRadius: 10,
-    cursor: "pointer",
-    transition: "0.2s"
-  }
-};
 
 export default ReadingSessions;

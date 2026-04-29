@@ -5,6 +5,8 @@ import {
   updateGoal,
   deleteGoal
 } from "../api/goals";
+import "./Goals.css";
+
 
 function Goals() {
   const [goals, setGoals] = useState([]);
@@ -119,146 +121,98 @@ function Goals() {
   };
 
   return (
-    <div style={{ padding: 20 }}>
+  <div className="goals-page">
 
-      <h1>🎯 My Reading Goals</h1>
+    <h1>My Reading Goals</h1>
 
-      {/* 🔥 MODAL */}
-      {completedGoal && (
-        <div style={styles.overlay}>
-          <div style={styles.modal}>
-            <h2>🎉 Вітаю!</h2>
-            <p>Ціль виконано!</p>
+    {/* MODAL */}
+    {completedGoal && (
+      <div className="goal-overlay">
+        <div className="goal-modal">
+          <h2>Вітаю!</h2>
+          <p>Ціль виконано!</p>
 
-            <p>
-              📚 {completedGoal.type.toUpperCase()} goal completed
-            </p>
+          <p>
+             {completedGoal.type.toUpperCase()} goal completed
+          </p>
 
-            <button onClick={handleCloseModal} style={styles.closeBtn}>
-              Close & remove goal
+          <button onClick={handleCloseModal}>
+            Close & remove goal
+          </button>
+        </div>
+      </div>
+    )}
+
+    {/* FORM */}
+    <div className="goals-form">
+      <select
+        value={form.type}
+        onChange={(e) =>
+          setForm({ ...form, type: e.target.value })
+        }
+      >
+        <option value="week">Week</option>
+        <option value="month">Month</option>
+        <option value="year">Year</option>
+      </select>
+
+      <input
+        type="number"
+        min="1"
+        value={form.targetCount}
+        onChange={(e) =>
+          setForm({
+            ...form,
+            targetCount: Number(e.target.value)
+          })
+        }
+      />
+
+      <button onClick={handleCreate}>
+        Create Goal
+      </button>
+    </div>
+
+    {/* LIST */}
+    {goals.map((g) => {
+      const percent = Math.min(
+        (Number(g.currentCount) / Number(g.targetCount)) * 100 || 0,
+        100
+      );
+
+      return (
+        <div key={g.id} className="goal-card">
+
+          <h3> {g.type.toUpperCase()} goal</h3>
+
+          <p>
+            {g.currentCount} / {g.targetCount} books
+          </p>
+
+          <div className="goal-bar">
+            <div
+              className="goal-progress"
+              style={{ width: `${percent}%` }}
+            />
+          </div>
+
+          <p>{Math.round(percent)}%</p>
+
+          <div className="goal-actions">
+            <button onClick={() => handleProgress(g.id)}>
+              ➕ Read book
+            </button>
+
+            <button onClick={() => handleDelete(g.id)}>
+              ❌ Delete
             </button>
           </div>
         </div>
-      )}
-
-      {/* ➕ FORM */}
-      <div style={styles.form}>
-        <select
-          value={form.type}
-          onChange={(e) =>
-            setForm({ ...form, type: e.target.value })
-          }
-        >
-          <option value="week">Week</option>
-          <option value="month">Month</option>
-          <option value="year">Year</option>
-        </select>
-
-        <input
-          type="number"
-          min="1"
-          value={form.targetCount}
-          onChange={(e) =>
-            setForm({
-              ...form,
-              targetCount: Number(e.target.value)
-            })
-          }
-        />
-
-        <button onClick={handleCreate}>
-          Create Goal
-        </button>
-      </div>
-
-      {/* 📊 LIST */}
-      {goals.map((g) => {
-        const percent = Math.min(
-          (Number(g.currentCount) / Number(g.targetCount)) * 100 || 0,
-          100
-        );
-
-        return (
-          <div key={g.id} style={styles.card}>
-            <h3>📚 {g.type.toUpperCase()} goal</h3>
-
-            <p>
-              {g.currentCount} / {g.targetCount} books
-            </p>
-
-            <div style={styles.bar}>
-              <div
-                style={{
-                  ...styles.progress,
-                  width: `${percent}%`
-                }}
-              />
-            </div>
-
-            <p>{Math.round(percent)}%</p>
-
-            <div style={styles.actions}>
-              <button onClick={() => handleProgress(g.id)}>
-                ➕ Read book
-              </button>
-
-              <button onClick={() => handleDelete(g.id)}>
-                ❌ Delete
-              </button>
-            </div>
-          </div>
-        );
-      })}
-    </div>
+      );
+    })}
+   </div>
   );
 }
 
-const styles = {
-  form: { display: "flex", gap: 10, marginBottom: 20 },
-  card: {
-    border: "1px solid #ddd",
-    padding: 15,
-    marginBottom: 15,
-    borderRadius: 10
-  },
-  bar: {
-    width: "100%",
-    height: 10,
-    background: "#eee",
-    borderRadius: 5,
-    marginTop: 10
-  },
-  progress: {
-    height: "100%",
-    background: "green",
-    borderRadius: 5
-  },
-  actions: {
-    marginTop: 10,
-    display: "flex",
-    gap: 10
-  },
-  overlay: {
-    position: "fixed",
-    inset: 0,
-    background: "rgba(0,0,0,0.5)",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    zIndex: 9999
-  },
-  modal: {
-    background: "#fff",
-    padding: 30,
-    borderRadius: 12,
-    textAlign: "center",
-    width: 320
-  },
-  closeBtn: {
-    marginTop: 15,
-    padding: "8px 15px",
-    cursor: "pointer"
-  }
-};
 
 export default Goals;
