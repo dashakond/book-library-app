@@ -1,4 +1,6 @@
 const { Review, User, Book } = require('../models/models');
+const { ReadingSession } = require('../models/models');
+const { Op } = require('sequelize');
 
 class ReviewController {
 
@@ -6,6 +8,22 @@ class ReviewController {
     async createReview(req, res) {
         try {
             const { bookId, rating, comment } = req.body;
+
+            // 🔥 перевірка чи користувач завершив читання
+            const session = await ReadingSession.findOne({
+                where: {
+                    userId: req.user.id,
+                    bookId,
+                    endTime: {
+                        [Op.ne]: null
+                    }
+                }
+            });
+            if (!session) {
+                return res.status(403).json({
+                    message: "Finish reading before leaving a review"
+                });
+            }
 
             const review = await Review.create({
                 userId: req.user.id,

@@ -1,205 +1,252 @@
 import { useEffect, useState, useRef } from "react";
 import { useParams } from "react-router-dom";
 import API from "../api/axios";
+import "./BookPage.css";
 
 function BookPage() {
   const { id } = useParams();
 
   const [book, setBook] = useState(null);
-  const [session, setSession] = useState(null);
+  const [activeSession, setActiveSession] = useState(null);
 
   const [startPage, setStartPage] = useState(1);
   const [endPage, setEndPage] = useState("");
 
   const [timer, setTimer] = useState(0);
 
+  const [rating, setRating] = useState(5);
+  const [comment, setComment] = useState("");
+  const [reviews, setReviews] = useState([]);
+  const [showReviewForm, setShowReviewForm] = useState(false);
+
   const intervalRef = useRef(null);
   const startTimeRef = useRef(null);
 
-  // 🔥 SAFE NUMBER (без мінусів)
-  const safePage = (value) => {
-    const num = Number(value);
-    if (isNaN(num) || num < 0) return 0;
-    return num;
+  const safePage = (v) => {
+    const n = Number(v);
+    return isNaN(n) || n < 0 ? 0 : n;
   };
 
-  // 📌 LOAD BOOK + LAST SESSION
+  // LOAD
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [bookRes, sessionRes] = await Promise.all([
-          API.get(`/book/${id}`),
-          API.get(`/sessions`)
-        ]);
+    const load = async () => {
+      const [bookRes, sessionRes, reviewRes] = await Promise.all([
+        API.get(`/book/${id}`),
+        API.get(`/sessions`),
+        API.get(`/reviews/book/${id}`)
+      ]);
 
-        setBook(bookRes.data);
+      setBook(bookRes.data);
+      setReviews(reviewRes.data);
 
-        // 🔥 беремо останню сесію цієї книги
-        const last = sessionRes.data
-          .filter(s => s.bookId == id)
-          .sort((a, b) => new Date(b.startTime) - new Date(a.startTime))[0];
+      const sessions = sessionRes.data
+        .filter(s => s.bookId == id)
+        .sort((a, b) => new Date(b.startTime) - new Date(a.startTime));
 
-        if (last?.endPage != null) {
-          setStartPage(last.endPage); // 💡 продовження читання
-        }
+      const active = sessions.find(s => !s.endTime);
+      const last = sessions[0];
 
-      } catch (err) {
-        console.log(err);
+      if (last?.endPage != null) setStartPage(last.endPage);
+
+      if (active) {
+        setActiveSession(active);
+        startTimeRef.current = new Date(active.startTime).getTime();
+
+        intervalRef.current = setInterval(() => {
+          setTimer(Math.floor((Date.now() - startTimeRef.current) / 1000));
+        }, 1000);
       }
     };
 
-    fetchData();
+    load();
 
-    return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-      }
-    };
+    return () => clearInterval(intervalRef.current);
   }, [id]);
 
-  // ▶ START
   const startReading = async () => {
-    try {
-      const res = await API.post("/sessions/start", {
-        bookId: id,
-        startPage: safePage(startPage),
-      });
+    const res = await API.post("/sessions/start", {
+      bookId: id,
+      startPage: safePage(startPage),
+    });
 
-      setSession(res.data);
+    setActiveSession(res.data);
+    startTimeRef.current = Date.now();
+    setTimer(0);
 
-      setTimer(0);
-      startTimeRef.current = Date.now();
-
-      intervalRef.current = setInterval(() => {
-        setTimer(
-          Math.floor((Date.now() - startTimeRef.current) / 1000)
-        );
-      }, 1000);
-
-    } catch (err) {
-      console.log(err);
-    }
+    intervalRef.current = setInterval(() => {
+      setTimer(Math.floor((Date.now() - startTimeRef.current) / 1000));
+    }, 1000);
   };
 
-  // ⏹ END
   const endReading = async () => {
+    const end = safePage(endPage);
+
+    if (end < startPage) return alert("Invalid page");
+
+    await API.post("/sessions/end", { endPage: end });
+
+    clearInterval(intervalRef.current);
+    setActiveSession(null);
+    setTimer(0);
+    setEndPage("");
+
+    const updated = await API.get(`/book/${id}`);
+    setBook(updated.data);
+    setStartPage(end);
+  };
+
+  const submitReview = async () => {
     try {
-      const end = safePage(endPage);
-
-      // 🔥 ВАЛІДАЦІЯ
-      if (end < startPage) {
-        return alert("End page cannot be less than start page");
-      }
-
-      await API.post("/sessions/end", {
-        endPage: end,
+      await API.post("/reviews", {
+        bookId: Number(id),
+        rating: Number(rating),
+        comment
       });
 
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-      }
+      const res = await API.get(`/reviews/book/${id}`);
+      setReviews(res.data);
 
-      setTimer(0);
-      setSession(null);
-      setEndPage("");
-
-      const updated = await API.get(`/book/${id}`);
-      setBook(updated.data);
-
-      // 🔥 новий старт = остання сторінка
-      setStartPage(end);
+      setComment("");
+      setRating(5);
+      setShowReviewForm(false);
 
     } catch (err) {
-      console.log(err);
+      console.error(err);
+      alert("Error submitting review");
     }
   };
 
-  if (!book) return <p>Loading...</p>;
+  if (!book) return <div className="loading">Loading...</div>;
 
-  // 📊 ПРОГРЕС (розумний)
-  const currentPage = safePage(endPage || startPage);
+  const progress = book.pages
+    ? Math.min(((safePage(endPage || startPage)) / book.pages) * 100, 100)
+    : 0;
 
-  const progress =
-    book.pages
-      ? Math.min((currentPage / book.pages) * 100, 100)
-      : 0;
+  const finished = progress >= 100 && !activeSession;
 
   return (
-    <div style={{ padding: 20 }}>
-      <h1>
-        {book.title} <span>({book.status})</span>
-      </h1>
+    <div className="book-layout">
 
-      <img
-        src={`http://localhost:5000/${book.image_url}`}
-        alt={book.title}
-        style={{ width: 200 }}
-      />
+      {/* HERO */}
+      <div className="hero">
 
-      <p><b>Author:</b> {book.author?.name}</p>
-      <p><b>Genre:</b> {book.genre?.name}</p>
-      <p><b>Pages:</b> {book.pages}</p>
+        <img src={`http://localhost:5000/${book.image_url}`} />
 
-      {/* 📊 PROGRESS */}
-      <div style={{ marginTop: 20 }}>
-        <p>Progress: {Math.round(progress)}%</p>
+        <div className="hero-info">
 
-        <div style={{
-          width: "100%",
-          height: 10,
-          background: "#eee",
-          borderRadius: 5
-        }}>
-          <div style={{
-            width: `${progress}%`,
-            height: "100%",
-            background: "green",
-            borderRadius: 5
-          }} />
+          <h1>{book.title}</h1>
+
+          <p className="meta">
+            {book.author?.name} • {book.genre?.name}
+          </p>
+
+          <p className="meta">Pages: {book.pages}</p>
+
+          {book.description && (
+            <p className="description">
+              {book.description}
+            </p>
+          )}
+
+          <span className="status">{book.status}</span>
+
         </div>
       </div>
 
-      {/* 📖 SESSION */}
-      <div style={{
-        marginTop: 20,
-        padding: 15,
-        border: "1px solid #ddd",
-        borderRadius: 10
-      }}>
-        <h3>Reading session</h3>
+      {/* PROGRESS */}
+      <div className="card">
+        <h3>Progress</h3>
 
-        {!session ? (
+        <div className="bar">
+          <div style={{ width: `${progress}%` }} />
+        </div>
+
+        <p className="percent">{Math.round(progress)}%</p>
+      </div>
+
+      {/* SESSION */}
+      <div className="card">
+        <h3>Session</h3>
+
+        {!activeSession ? (
           <>
             <input
-              type="number"
-              min="0"
               value={startPage}
-              onChange={(e) => setStartPage(e.target.value)}
+              onChange={e => setStartPage(e.target.value)}
               placeholder="Start page"
             />
-
-            <button onClick={startReading}>
-              ▶ Start reading
-            </button>
+            <button onClick={startReading}>Start reading</button>
           </>
         ) : (
           <>
-            <p>⏱ Time: {timer} sec</p>
+            <div className="timer">⏱ {timer}s</div>
 
             <input
-              type="number"
-              min={startPage}
               value={endPage}
-              onChange={(e) => setEndPage(e.target.value)}
+              onChange={e => setEndPage(e.target.value)}
               placeholder="End page"
             />
 
-            <button onClick={endReading}>
-              ⏹ Finish reading
-            </button>
+            <button onClick={endReading}>Finish reading</button>
           </>
         )}
       </div>
+
+      {/* REVIEW FORM */}
+      {finished && (
+        <div className="card">
+
+          <button onClick={() => setShowReviewForm(!showReviewForm)}>
+            {showReviewForm ? "Close review" : "Write a review ⭐"}
+          </button>
+
+          {showReviewForm && (
+            <div className="review-form">
+
+              <h3>Leave review</h3>
+
+              <select
+                value={rating}
+                onChange={(e) => setRating(Number(e.target.value))}
+              >
+                {[1,2,3,4,5].map(n => (
+                  <option key={n} value={n}>{n} ⭐</option>
+                ))}
+              </select>
+
+              <textarea
+                value={comment}
+                onChange={(e) => setComment(e.target.value)}
+                placeholder="Write your thoughts..."
+              />
+
+              <button onClick={submitReview}>
+                Submit review
+              </button>
+
+            </div>
+          )}
+
+        </div>
+      )}
+
+      {/* REVIEWS */}
+      <div className="card reviews">
+
+        <h3>Reviews</h3>
+
+        {reviews.length === 0 && <p>No reviews yet</p>}
+
+        {reviews.map(r => (
+          <div className="review" key={r.id}>
+            <b>{r.user?.name}</b>
+            <div className="stars">{"⭐".repeat(r.rating)}</div>
+            <p>{r.comment}</p>
+          </div>
+        ))}
+
+      </div>
+
     </div>
   );
 }
