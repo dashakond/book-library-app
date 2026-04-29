@@ -1,4 +1,4 @@
-const { Book, Author, Genre, ReadingSession } = require('../models/models');
+const { Book, Author, Genre, ReadingSession, Goal } = require('../models/models');
 const { Op } = require('sequelize');
 const { v4: uuidv4 } = require('uuid');
 const path = require('path');
@@ -181,6 +181,44 @@ class BookController {
 
         } catch (e) {
             return res.status(500).json({ message: "Error deleting book" });
+        }
+    }
+    async finishBook(req, res) {
+        try {
+            const userId = req.user.id;
+            const { bookId } = req.body;
+
+            const book = await Book.findOne({
+                where: { id: bookId, userId }
+            });
+
+            if (!book) {
+                return res.status(404).json({ message: "Book not found" });
+            }
+
+            // 🔥 1. ставимо finished
+            await book.update({ status: "finished" });
+
+            // 🔥 2. оновлюємо goals
+            const goals = await Goal.findAll({
+                where: { userId }
+            });
+
+            const now = new Date();
+
+            for (let goal of goals) {
+
+                // ⛔ тільки активні
+                if (new Date(goal.endDate) < now) continue;
+
+                goal.currentCount += 1;
+                await goal.save();
+            }
+
+            return res.json({ message: "Book finished + goals updated" });
+
+        } catch (e) {
+            return res.status(500).json({ message: e.message });
         }
     }
 }

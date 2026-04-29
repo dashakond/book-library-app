@@ -48,7 +48,8 @@ class GoalController {
                 targetCount,
                 currentCount: 0,
                 startDate,
-                endDate
+                endDate,
+                completedBooks: []
             });
 
             return res.json(goal);
@@ -63,7 +64,15 @@ class GoalController {
             const goals = await Goal.findAll({
                 where: { userId: req.user.id }
             });
+            const now = new Date();
 
+            for (let goal of goals) {
+                if (new Date(goal.endDate) < now) {
+                    goal.currentCount = 0;
+                    goal.completedBooks = [];
+                    await goal.save();
+                }
+            }
             return res.json(goals);
         } catch (e) {
             return res.status(500).json({ message: e.message });
@@ -73,6 +82,7 @@ class GoalController {
     async updateProgress(req, res) {
         try {
             const { id } = req.params;
+            const { bookId } = req.body;
 
             const goal = await Goal.findOne({
                 where: { id, userId: req.user.id }
@@ -82,7 +92,18 @@ class GoalController {
                 return res.status(404).json({ message: "Not found" });
             }
 
-            goal.currentCount += 1;
+            if (goal.completedBooks.includes(bookId)) {
+                return res.json(goal);
+            }
+
+            goal.completedBooks = [...goal.completedBooks, bookId];
+
+            goal.currentCount = Math.min(
+                goal.currentCount + 1,
+                goal.targetCount
+            );
+
+            await goal.save();
             await goal.save();
 
             return res.json(goal);
@@ -110,6 +131,9 @@ class GoalController {
             return res.status(500).json({ message: e.message });
         }
     }
+
+
+
 }
 
 module.exports = new GoalController();

@@ -17,4 +17,6 @@ router.put('/:id', authMiddleware, bookController.updateBook)
 //  видалити книгу
 router.delete('/:id', authMiddleware, bookController.deleteBook)
 
+router.post('/finish', authMiddleware, bookController.finishBook)
+
 module.exports = router;

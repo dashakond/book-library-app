@@ -34,6 +34,10 @@ const Goal = sequelize.define('goal', {
 
     endDate: {
         type: DataTypes.DATE
+    },
+    completedBooks: {
+        type: DataTypes.JSON,
+        defaultValue: []
     }
 });
 module.exports = Goal;

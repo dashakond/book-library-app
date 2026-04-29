@@ -83,8 +83,12 @@ function BookPage() {
 
     if (end < startPage) return alert("Invalid page");
 
-    await API.post("/sessions/end", { endPage: end });
+   await API.post("/sessions/end", { endPage: end });
 
+    await API.post("/book/finish", {
+     bookId: id
+    });
+    
     clearInterval(intervalRef.current);
     setActiveSession(null);
     setTimer(0);
