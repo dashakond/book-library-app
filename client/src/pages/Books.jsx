@@ -86,7 +86,15 @@ function Books() {
       console.log(err);
     }
   };
-
+const handleDelete = async (bookId) => {
+  try {
+    await API.delete(`/book/${bookId}`);
+    setBooks(prev => prev.filter(b => b.id !== bookId));
+  } catch (err) {
+    console.log(err);
+    alert("Error deleting book");
+  }
+};
   // 🔎 FILTER LOGIC
   const filteredBooks = books.filter((book) => {
     const matchSearch =
@@ -259,22 +267,35 @@ function Books() {
       <div className="books-grid">
         {filteredBooks.map((book) => (
           <div
-            key={book.id}
+           key={book.id}
             className="book-card"
             onClick={() => navigate(`/book/${book.id}`)}
-          >
-            <img src={`http://localhost:5000/${book.image_url}`} />
+             >
 
-            <div className="book-info">
+             {/* ❌ DELETE BUTTON */}
+             <button
+              className="delete-btn"
+               onClick={(e) => {
+               e.stopPropagation(); // 🔥 важливо!
+               handleDelete(book.id);
+                }}
+               >
+                 ✕
+                 </button>
+
+              <img src={`http://localhost:5000/${book.image_url}`} />
+
+  <div className="book-info">
               <h3>{book.title}</h3>
 
               <p><b>Author:</b> {book.author?.name}</p>
               <p><b>Genre:</b> {book.genre?.name}</p>
 
               <span className={`status ${book.status}`}>
-  {book.status.replace("_", " ")}
-</span>
-
+          {book.status.replace("_", " ")}
+              </span>
+              
+<div className="dropdown-wrapper">
               <button
                 className="add-btn-book"
                 onClick={(e) => {
@@ -300,7 +321,8 @@ function Books() {
                     </div>
                   ))}
                 </div>
-              )}
+                )}
+              </div>
 
             </div>
           </div>

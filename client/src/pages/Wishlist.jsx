@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
 import API from "../api/axios";
 import "./Wishlist.css";
-
 function Wishlist() {
+
   const [items, setItems] = useState([]);
-  const [showForm, setShowForm] = useState(false); // 🔥 NEW
+  const [showForm, setShowForm] = useState(false);
+  const [editingItem, setEditingItem] = useState(null);
 
   const [form, setForm] = useState({
     title: "",
@@ -15,6 +16,42 @@ function Wishlist() {
   });
 
   const [errors, setErrors] = useState({});
+
+  const startEdit = (item) => {
+    setForm({
+      title: item.title || "",
+      author: item.author || "",
+      price: item.price || "",
+      link: item.link || "",
+      note: item.note || ""
+    });
+
+    setEditingItem(item);
+    setShowForm(true);
+  };
+  const updateItem = async () => {
+    try {
+      if (!validate()) return;
+
+      await API.put(`/wishlist/${editingItem.id}`, form);
+
+      setEditingItem(null);   // 🔥 обовʼязково
+      setShowForm(false);
+
+      setForm({
+        title: "",
+        author: "",
+        price: "",
+        link: "",
+        note: ""
+      });
+
+      fetchData();
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
 
   const fetchData = async () => {
     try {
@@ -45,6 +82,8 @@ function Wishlist() {
 
       await API.post("/wishlist", form);
 
+      setEditingItem(null); // 🔥 важливо (щоб не застрягло)
+
       setForm({
         title: "",
         author: "",
@@ -53,8 +92,7 @@ function Wishlist() {
         note: ""
       });
 
-      setErrors({});
-      setShowForm(false); // 🔥 ховаємо після додавання
+      setShowForm(false);
       fetchData();
     } catch (err) {
       console.log(err);
@@ -66,13 +104,7 @@ function Wishlist() {
     fetchData();
   };
 
-  const updateItem = async (id) => {
-    const newTitle = prompt("Enter new title");
-    if (!newTitle?.trim()) return;
-
-    await API.put(`/wishlist/${id}`, { title: newTitle });
-    fetchData();
-  };
+  
 
   return (
     <div className="wishlist-page">
@@ -81,7 +113,17 @@ function Wishlist() {
 
         <button
           className="add-btn"
-          onClick={() => setShowForm(!showForm)}
+          onClick={() => {
+            setShowForm(true);
+            setEditingItem(null);   // 🔥 ВАЖЛИВО
+            setForm({
+              title: "",
+              author: "",
+              price: "",
+              link: "",
+              note: ""
+            });
+          }}
         >
           + Add book
         </button>
@@ -127,8 +169,8 @@ function Wishlist() {
             }
           />
 
-          <button onClick={addItem}>
-            Save
+          <button onClick={editingItem ? updateItem : addItem}>
+            {editingItem ? "Update" : "Save"}
           </button>
         </div>
       )}
@@ -149,7 +191,7 @@ function Wishlist() {
             )}
 
             <div className="actions">
-              <button onClick={() => updateItem(item.id)}>
+              <button onClick={() => startEdit(item)}>
                 ✏️
               </button>
               <button onClick={() => deleteItem(item.id)}>
@@ -161,6 +203,7 @@ function Wishlist() {
       </div>
     </div>
   );
+            
 }
 
 export default Wishlist;

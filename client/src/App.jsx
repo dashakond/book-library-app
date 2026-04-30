@@ -10,6 +10,7 @@ import CollectionPage from "./pages/CollectionPage";
 import Wishlist from "./pages/Wishlist";
 import Goals from "./pages/Goals";
 import ReadingSessions from "./pages/ReadingHistory";
+import Home from "./pages/Home";
 
 import ProtectedLayout from "./layout/ProtectedLayout";
 
@@ -18,7 +19,7 @@ function App() {
 
   return (
     <Routes>
-
+      <Route path="/" element={<Home />} />
       {/* 🔓 public */}
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />

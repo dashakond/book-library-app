@@ -2,6 +2,7 @@ const { Book, Author, Genre, ReadingSession, Goal } = require('../models/models'
 const { Op } = require('sequelize');
 const { v4: uuidv4 } = require('uuid');
 const path = require('path');
+
 class BookController {
 
     async createBook(req, res) {
@@ -16,8 +17,11 @@ class BookController {
 
             // 🔥 ДОДАЙ ОЦЕ
             const authorName = req.body.authorName || req.body.author;
-            const genreName = req.body.genreName || req.body.genre;
+            const genreName = (req.body.genreName || req.body.genre || "")
+                .trim()
+                .toLowerCase();
             let fileName = null;
+
 
             // 📌 image upload (як у тебе вже є)
             if (req.files && req.files.image) {
@@ -40,9 +44,9 @@ class BookController {
             if (!author) {
                 author = await Author.create({ name: authorName });
             }
-
-            // 🔥 2. FIND OR CREATE GENRE
-            let genre = await Genre.findOne({ where: { name: genreName } });
+            let genre = await Genre.findOne({
+                where: { name: genreName }
+            });
 
             if (!genre) {
                 genre = await Genre.create({ name: genreName });

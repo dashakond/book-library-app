@@ -49,18 +49,30 @@ function CollectionPage() {
         <div className="books-list">
           {collection.books.map((book) => (
             <div key={book.id} className="book-item">
-              <div className="book-info">
-                <span className="book-icon">📖</span>
-                <span className="book-title">{book.title}</span>
-              </div>
+  
+  <div className="book-left">
+    <img
+      src={`http://localhost:5000/${book.image_url}`}
+      alt={book.title}
+      className="book-cover"
+    />
 
-              <button
-                onClick={() => handleRemoveBook(book.id)}
-                className="remove-btn"
-              >
-                Remove
-              </button>
-            </div>
+    <div className="book-info">
+      <h4>{book.title}</h4>
+
+      <span className={`status ${book.status}`}>
+        {book.status?.replace("_", " ")}
+      </span>
+    </div>
+  </div>
+
+  <button
+    onClick={() => handleRemoveBook(book.id)}
+    className="remove-btn"
+  >
+    Remove
+  </button>
+</div>
           ))}
         </div>
       )}
